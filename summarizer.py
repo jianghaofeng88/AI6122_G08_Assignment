@@ -125,7 +125,6 @@ def generate_summary(typ, asin, n):
 
 
 if __name__ == '__main__':
-    #exit(1)
     if (len(sys.argv) != 1):
         print("Usage: \npython summarizer.py\n")
         exit(1)
@@ -144,7 +143,7 @@ if __name__ == '__main__':
             print("The index must be an integer from -24 to 23")
             typ = input("Please choose the type of the product by index (e.g. 0, 12, 23, etc.):")
         writefile(typ)
-        print(f"\nIn type {TYPES[int(typ)]}, some (up to 20) product ids are:")
+        print(f"\nIn type {regularize(typ)}, some product ids are: (for simplexity, just showing up to 20 here)")
         l=product_id(typ)
         print(', '.join(l[:min(20,len(l))]))
         i = input(f"Please choose the product id that you want to view the review summary (e.g. {l[0]}):")
