@@ -2,6 +2,7 @@ import json
 import gzip
 import wget
 import random
+import os
 
 TYPES = ['Books','Electronics',
 'Movies and TV',
@@ -35,12 +36,15 @@ def parse(path):
 def regularize(typ):
   '''
   Make the input type align with the offcial gz file name, and also enable using
-  index of TYPES to represent the corresponding product type.
+  index of TYPES (i.e. an integer) to represent the corresponding product type.
+  For example, as a function argument, 0, '0' and 'Books' refer to the same type.
   This funciton just intends to make life easier.
   '''
   
   if (type(typ)==int):
     typ = TYPES[typ]
+  elif (typ.replace('-','',1).isdigit()):
+    typ = TYPES[int(typ)]
   typ = typ.replace(' ','_')
   typ = typ.replace(',','')
   gz = "reviews_"+typ+"_5.json.gz"
@@ -49,18 +53,26 @@ def regularize(typ):
 def writefile(typ):
   '''
   Download and write the corresponding data for a certain type.
+  Both the downloaded gz file and the txt file will be stored in the "data" folder.
+  If the current directory does not have "data" folder, it will create one.
   '''
   
   typ,gz = regularize(typ)
-  URL = "http://snap.stanford.edu/data/amazon/productGraph/categoryFiles/"+gz
-  response = wget.download(URL, "./data")
-  print(f"gz file of Type {typ} is downloaded")
+  if (not os.path.isdir("data")):
+    os.mkdir("data")
+  if (os.path.isfile("data/"+gz)):
+    print(f"gz file of type {typ} has been already downloaded")
+  else:
+    print(f"Dowloading data of Type {typ}......")
+    URL = "http://snap.stanford.edu/data/amazon/productGraph/categoryFiles/"+gz
+    response = wget.download(URL, "./data")
+    print(f"\ngz file of type {typ} is successfully downloaded")
 
   f = open("./data/"+typ+".txt", 'w')
   for l in parse("./data/"+gz):
     f.write(l + '\n')
   f.close()
-  print(f"Data in {typ} is written")
+  print(f"Data in {typ} is written to a txt file")
   
 
 def products_list(typ):
