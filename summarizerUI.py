@@ -16,13 +16,15 @@ if __name__ == '__main__':
     next_or_exit = ""
     known_types = [0]*24
     while (next_or_exit != "exit"):
-        typ = input("\nPlease choose the type of the product by index (e.g. 0, 12, 23, etc.):")
+        typ = input("\nPlease choose the type of the product by index (e.g. 4, 12, 22, etc. However, due to large size, {0,1,2,3,6,14} is not recommended):")
         while not (typ.replace('-','',1).isdigit() and int(typ) >= -24 and int(typ) <= 23):
             print("The index must be an integer from -24 to 23")
-            typ = input("Please choose the type of the product by index (e.g. 0, 12, 23, etc.):")
+            typ = input("Please choose the type of the product by index (e.g. 4, 12, 22, etc. However, due to large size, {0,1,2,3,6,14} is not recommended):")
         if known_types[int(typ)] == 0:
             writefile(typ)
+            print(f"Initializing dataset for {regularize(typ)[0]}......")
             initialize_dataset(typ)
+            print(f"Initializing dataset for {regularize(typ)[0]} is successful.")
             get_global_values()
             known_types[int(typ)] = (products_list(), product_id(), review_text())
         else:
