@@ -109,6 +109,7 @@ def reviewText(typ):
   return result
 
 def random_200(typ):
+  typ,gz = regularize(typ)
   text = products_list(typ)
   random.seed(1000)
   lens = len(text)
@@ -126,3 +127,4 @@ def random_200(typ):
   with open(fileName,'w') as file:
     for i in result:
       file.write(str(i) + '\n')
+  return result
