@@ -28,6 +28,12 @@ TYPES = ['Books','Electronics',
 'Musical Instruments',
 'Amazon Instant Video']
 
+
+global dataset200
+global asin200
+global reviewText200
+       
+
 def parse(path):
   g = gzip.open(path, 'r')
   for l in g:
@@ -49,6 +55,7 @@ def regularize(typ):
   typ = typ.replace(',','')
   gz = "reviews_"+typ+"_5.json.gz"
   return typ,gz
+  
 
 def writefile(typ):
   '''
@@ -69,62 +76,50 @@ def writefile(typ):
     print(f"\ngz file of type {typ} is successfully downloaded")
 
   f = open("./data/"+typ+".txt", 'w')
+  length=0
   for l in parse("./data/"+gz):
     f.write(l + '\n')
+    length+=1
   f.close()
-  print(f"Data in {typ} is written to a txt file")
+  print(f"Full Data in {typ} is written to a txt file")
   
 
-def products_list(typ):
+def initialize_dataset(typ):
   '''
   Output a list of dictionaries of a certain product type.
   '''
   
   t,gz = regularize(typ)
-  result = []
+  reviews = []
+  asins = []
   for p in parse("./data/"+gz):
-    result.append(json.loads(p))
-  return result
-
-def product_id(typ):
-  '''
-  List all the product ids (asin) in this type.
-  '''
-  l = products_list(typ)
-  result = []
-  for item in l:
-    if item['asin'] not in result:
-      result.append(item['asin'])
-  return result
-
-def reviewText(typ):
-  '''
-  List all the rewviews (reviewText) in this type.
-  '''
-  l = products_list(typ)
-  result = []
-  for item in l:
-    if item['reviewText'] not in result:
-      result.append(item['reviewText'])
-  return result
-
-def random_200(typ):
-  typ,gz = regularize(typ)
-  text = products_list(typ)
+    d = json.loads(p)
+    reviews.append(d)
+    if d['asin'] not in asins:
+      asins.append(d['asin'])
+  length = len(asins)
   random.seed(1000)
-  lens = len(text)
-  index = random.sample(range(0,lens),200)
-  index = sorted(index)
-  result = []
+  index = sorted(random.sample(range(0,length),200))
+  global asin200
+  asin200 = []
   for i in index:
-    result.append(text[i])
-  # return result
-  fileName="./data/"+typ+"_200.txt"
-  # f = open("./data/"+typ+"_200.txt", 'w')
-  # for i in result:
-  #     f.write(i + '\n')
-  # f.close()
-  with open(fileName,'w') as file:
-    for i in result:
-      file.write(str(i) + '\n')
-  return result
+    asin200.append(asins[i])
+  global dataset200
+  dataset200=[]
+  global reviewText200
+  reviewText200 = []
+  for review in reviews:
+    if review['asin'] in asin200:
+      dataset200.append(review)
+      reviewText200.append(review['reviewText'])
+  
+
+def products_list():
+  return dataset200
+
+def product_id():
+  return asin200
+
+def review_text():
+  return reviewText200
+
