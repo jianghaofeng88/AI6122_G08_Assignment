@@ -6,10 +6,32 @@ import nltk
 from nltk import sent_tokenize, word_tokenize, Tree, pos_tag, WordNetLemmatizer
 from collections import Counter
 
+global dataset200
+global asin200
+global reviewText200
+
+
 noun = "(<NN>|<NNS>)"
 verb = "(<VB>|<VBD>|<VBG>|<VBN>|<VBP>|<VBZ>)"
 adj = "(<JJ>|<JJS>|<JJR>)"
 adv = "(<MD>|<RB>|<RBR>|<RBS>)"
+
+def get_global_values():
+    global dataset200
+    dataset200 = products_list()
+    global asin200
+    asin200 = product_id()
+    global reviewText200  
+    reviewText200 = review_text()
+
+def set_global_values(d,a,r):
+    global dataset200
+    dataset200 = d
+    global asin200
+    asin200 = a
+    global reviewText200  
+    reviewText200 = r
+
 
 def adj_NP():
     g="adj_NP: {<DT>?"
@@ -25,7 +47,7 @@ def adv_VP():
     return g
 
 def punctuation_strip(string):
-    puncts = ",.?:;/<>!@#$%^&*()[]{}"
+    puncts = ",.?:;!"
     for p in puncts:
         string = string.replace(p,' '+p+' ')
     return string
@@ -33,6 +55,8 @@ def punctuation_strip(string):
 def extract_grammar(string, grammar):
     string = punctuation_strip(string)
     tokens = word_tokenize(string)
+    tokens = [word for word in tokens if word.isalnum() \
+              or '-' in word or word in [',','.','?',':',';','!']]
     pos = pos_tag(tokens)  
     cp = nltk.RegexpParser(grammar)
     parse_tree = cp.parse(pos)
@@ -59,32 +83,13 @@ def remove_abb(string):
     string = string.replace("'m"," am")
     string = string.replace("'re"," are")
     string = string.replace("n't"," not")
+    string = string.replace("doesnt","does not")
+    string = string.replace("dont","do not")
+    string = string.replace("didnt","did not")
+    string = string.replace("isnt","is not")
+    string = string.replace("arent","are not")    
     string = string.replace("'d"," would")
     return string
-
-def process_product(typ, asin):
-    l = products_list(typ)
-    raw_text = ""
-    strlist = []
-    taglist = []
-    for item in l:
-        if item['asin']==asin:
-            sentence = remove_abb(item['reviewText'])
-            raw_text += sentence
-            NPs = extract_grammar(sentence,adj_NP())
-            VPs = extract_grammar(sentence,adv_VP())
-            strlist.extend(make_list(NPs)[0])
-            strlist.extend(make_list(VPs)[0])
-            taglist.extend(make_list(NPs)[1])
-            taglist.extend(make_list(VPs)[1])
-    ripe_text = ' '.join(strlist)
-    tagdict = dict([item for sublist in taglist for item in sublist])
-    return raw_text, ripe_text, strlist, taglist, tagdict
-
-def tfidf(term, document, collection):
-    tf = Counter(word_tokenize(document))[term]
-    df = sum(map(lambda t: term in t, collection))  
-    return (1+np.log10(tf))*np.log10(len(collection)/df)
 
 def normalize(word):
     # Remove abbreviation
@@ -101,11 +106,34 @@ def normalize_sentence(sentence):
     sentence = punctuation_strip(sentence)
     return ' '.join(list(map(normalize,word_tokenize(sentence))))
         
+def process_product(asin):
+    l = dataset200
+    raw_text = ""
+    strlist = []
+    taglist = []
+    for item in l:
+        if item['asin']==asin:
+            sentence = remove_abb(item['reviewText'])
+            raw_text += sentence
+            NPs = extract_grammar(sentence,adj_NP())
+            VPs = extract_grammar(sentence,adv_VP())
+            strlist.extend(make_list(NPs)[0])
+            strlist.extend(make_list(VPs)[0])
+            taglist.extend(make_list(NPs)[1])
+            taglist.extend(make_list(VPs)[1])
+    tagdict = dict([item for sublist in taglist for item in sublist])
+    return raw_text, strlist, tagdict
 
-def generate_score(typ, asin):
-    raw_text, ripe_text, strlist, taglist, tagdict = process_product(typ, asin)
+def tfidf(term, document, collection):
+    tf = max(1,Counter(word_tokenize(document))[term])
+    df = sum(map(lambda t: term in t, collection))  
+    return (1+np.log10(tf))*np.log10(len(collection)/df)
+
+
+def generate_score(asin):
+    raw_text, strlist, tagdict = process_product(asin)
     document = normalize_sentence(raw_text)
-    collection = list(map(normalize_sentence, reviewText(typ)))
+    collection = list(map(normalize_sentence, reviewText200))
     score_dictionary = {}
     for s in strlist:
         normalized_keys = list(map(normalize_sentence, score_dictionary.keys()))
@@ -119,42 +147,40 @@ def generate_score(typ, asin):
         score_dictionary[s]=score
     return score_dictionary
 
-def generate_summary(typ, asin, n):
-    sd = generate_score(typ, asin)
+def generate_summary(asin, n):
+    sd = generate_score(asin)
     return heapq.nlargest(n, sd, key=sd.get)
 
 
 if __name__ == '__main__':
-    if (len(sys.argv) != 1):
-        print("Usage: \npython summarizer.py\n")
-        exit(1)
-    print("Section 3.4 Review Summarizer")
-    print("Developed by Jiang Haofeng\n2022/10/22\n--------------------------------------------\n")
-    print("Here are the product types avaliable:")
-    l = list(np.arange(len(TYPES)))
-    d = dict(zip(l,TYPES))
-    for key in d:
-        print(f"{key}: {d[key]}") 
-        
-    next_or_exit = ""
-    while (next_or_exit != "exit"):
-        typ = input("\nPlease choose the type of the product by index (e.g. 0, 12, 23, etc.):")
-        while not (typ.replace('-','',1).isdigit() and int(typ) >= -24 and int(typ) <= 23):
-            print("The index must be an integer from -24 to 23")
-            typ = input("Please choose the type of the product by index (e.g. 0, 12, 23, etc.):")
-        writefile(typ)
-        print(f"\nIn type {regularize(typ)}, some product ids are: (for simplexity, just showing up to 20 here)")
-        l=product_id(typ)
-        print(', '.join(l[:min(20,len(l))]))
-        i = input(f"Please choose the product id that you want to view the review summary (e.g. {l[0]}):")
-        while not (i in l):
-            print("The asin must be in this type")
-            i = input(f"Please choose the product id that you want to view the review summary (e.g. {l[0]}):")
-        print(f"\nReview summary of the product {i}:")
-        print('\n'.join(generate_summary(typ, i, 10)))
-        print("\n")
-        next_or_exit = ""
-        while (next_or_exit != "next" and next_or_exit != "exit"):
-            next_or_exit = input("Enter 'next' to view other products, or enter 'exit' to exit:")       
-    print("\nThanks for using!")
+    writefile(-2)
+    writefile(-3)
+    print("\n---------------------------------------------------\n")
+    
+    initialize_dataset(-2)
+    get_global_values()
+    review_number = {}
+    for review in dataset200:
+        if review['asin'] not in review_number:
+            review_number[review['asin']] = 1
+        else:
+            review_number[review['asin']] += 1
+    mid_asin = list(review_number.keys())[list(review_number.values()).index(10)]
+    print(f"type = {regularize(-2)[0]}, asin = {mid_asin}\nReview summary:")
+    print('\n'.join(generate_summary(mid_asin, 10)))
+    print("\n---------------------------------------------------\n")
+    
+    initialize_dataset(-3)
+    get_global_values()
+    review_number = {}
+    for review in dataset200:
+        if review['asin'] not in review_number:
+            review_number[review['asin']] = 1
+        else:
+            review_number[review['asin']] += 1
+    mid_asin = list(review_number.keys())[list(review_number.values()).index(10)]
+    print(f"type = {regularize(-3)[0]}, asin = {mid_asin}\nReview summary:")
+    print('\n'.join(generate_summary(mid_asin, 10)))
+    print("\n---------------------------------------------------\n")
+    
     exit(0)
