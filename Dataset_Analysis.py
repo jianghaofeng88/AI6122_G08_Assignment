@@ -1,12 +1,8 @@
+from dataset import *
 import pandas as pd
-import random
-import gzip
-import json
-import wget
 import re
 import string
 import math
-import os
 import nltk
 from nltk.tokenize import TreebankWordTokenizer, sent_tokenize
 from nltk.corpus import stopwords
@@ -16,128 +12,6 @@ from nltk.probability import FreqDist
 from collections import Counter
 
 nltk.download('stopwords')
-
-TYPES = ['Books', 'Electronics',
-         'Movies and TV',
-         'CDs and Vinyl',
-         'Clothing, Shoes and Jewelry',
-         'Home and Kitchen',
-         'Kindle Store',
-         'Sports and Outdoors',
-         'Cell Phones and Accessories',
-         'Health and Personal Care',
-         'Toys and Games',
-         'Video Games',
-         'Tools and Home Improvement',
-         'Beauty',
-         'Apps for Android',
-         'Office Products',
-         'Pet Supplies',
-         'Automotive',
-         'Grocery and Gourmet Food',
-         'Patio, Lawn and Garden',
-         'Baby',
-         'Digital Music',
-         'Musical Instruments',
-         'Amazon Instant Video']
-
-global dataset200
-global asin200
-global reviewText200
-
-
-def parse(path):
-    g = gzip.open(path, 'r')
-    for l in g:
-        yield json.dumps(eval(l))
-
-
-def regularize(typ):
-    """
-    Make the input type align with the official gz file name, and also enable using
-    index of TYPES (i.e. an integer) to represent the corresponding product type.
-    For example, as a function argument, 0, '0' and 'Books' refer to the same type.
-    This function just intends to make life easier.
-    """
-
-    if type(typ) == int:
-        typ = TYPES[typ]
-    elif typ.replace('-', '', 1).isdigit():
-        typ = TYPES[int(typ)]
-    typ = typ.replace(' ', '_')
-    typ = typ.replace(',', '')
-    gz = "reviews_" + typ + "_5.json.gz"
-    return typ, gz
-
-
-def writefile(typ):
-    """
-  Download and write the corresponding data for a certain type.
-  Both the downloaded gz file and the txt file will be stored in the "data" folder.
-  If the current directory does not have "data" folder, it will create one.
-  """
-
-    typ, gz = regularize(typ)
-    if not os.path.isdir("data"):
-        os.mkdir("data")
-    if os.path.isfile("data/" + gz):
-        print(f"gz file of type {typ} has been already downloaded")
-    else:
-        print(f"Dowloading data of Type {typ}......")
-        URL = "http://snap.stanford.edu/data/amazon/productGraph/categoryFiles/" + gz
-        response = wget.download(URL, "./data")
-        print(f"\ngz file of type {typ} is successfully downloaded")
-
-    f = open("./data/" + typ + ".txt", 'w')
-    length = 0
-    for l in parse("./data/" + gz):
-        f.write(l + '\n')
-        length += 1
-    f.close()
-    print(f"Full Data in {typ} is written to a txt file")
-
-
-def initialize_dataset(typ):
-    """
-  Output a list of dictionaries of a certain product type.
-  """
-
-    t, gz = regularize(typ)
-    reviews = []
-    asins = []
-    for p in parse("./data/" + gz):
-        d = json.loads(p)
-        reviews.append(d)
-        if d['asin'] not in asins:
-            asins.append(d['asin'])
-    length = len(asins)
-    random.seed(1000)
-    index = sorted(random.sample(range(0, length), 200))
-    global asin200
-    asin200 = []
-    for i in index:
-        asin200.append(asins[i])
-    global dataset200
-    dataset200 = []
-    global reviewText200
-    reviewText200 = []
-    for review in reviews:
-        if review['asin'] in asin200:
-            dataset200.append(review)
-            reviewText200.append(review['reviewText'])
-
-
-def products_list():
-    return dataset200
-
-
-def product_id():
-    return asin200
-
-
-def review_text():
-    return reviewText200
-
 
 def list_to_df(l):
     """
@@ -272,7 +146,7 @@ def review_token_distribution(corpus, typ, punctuation=True):
     return plot_info, df
 
 
-def dataset_uni_token_distribution(corpus, typ, punctuation=True, stem=True, decapitalize=True, zoom=False, x_max=100,
+def dataset_uni_token_distribution(corpus, typ, filename, punctuation=True, stem=True, decapitalize=True, zoom=False, x_max=100,
                                    y_max=200):
     """
     At the dataset level, show two distributions to observe the impact of stemming.
@@ -312,10 +186,11 @@ def dataset_uni_token_distribution(corpus, typ, punctuation=True, stem=True, dec
     plt.xlabel('The number of unique tokens in a dataset')
     plt.ylabel('The number of times each token appears in the dataset')
     plt.legend()
-    plt.show()
+    plt.savefig("images/"+filename)
+    # plt.show()
 
 
-def compare_plot(dfA, dfB, plot_infoA, plot_infoB, zoom=False, xy_max=200):
+def compare_plot(dfA, dfB, plot_infoA, plot_infoB, filename, zoom=False, xy_max=200):
     """
     Compare two distribution and draw the plot
     """
@@ -338,7 +213,8 @@ def compare_plot(dfA, dfB, plot_infoA, plot_infoB, zoom=False, xy_max=200):
     plt.xlabel(plot_infoA['xlabel'])
     plt.ylabel(plot_infoA['ylabel'])
     plt.legend()
-    plt.show()
+    plt.savefig("images/"+filename)
+    # plt.show()
 
 
 def point_wise_relative_entropy(corpus_l, typ_l, punctuation=True, stop_word=True):
@@ -407,24 +283,29 @@ if __name__ == "__main__":
     # Type = input("type is: ")
     Type1 = 'Digital Music'
     Type2 = 'Musical Instruments'
-
+    
+    writefile(Type1)
     initialize_dataset(Type1)
     sample1 = products_list()
+    writefile(Type2)
     initialize_dataset(Type2)
     sample2 = products_list()
 
+    if (not os.path.isdir("images")):
+        os.mkdir("images")        
+
     plot_info1, df_rtd1 = review_sentence_distribution(sample1, Type1)
     plot_info2, df_rtd2 = review_sentence_distribution(sample2, Type2)
-    compare_plot(df_rtd1, df_rtd2, plot_info1, plot_info2)
+    compare_plot(df_rtd1, df_rtd2, plot_info1, plot_info2, "sentence_duistribution_comparison.png")
 
     plot_info3, df_rtd3 = review_token_distribution(sample1, Type1)
     plot_info4, df_rtd4 = review_token_distribution(sample2, Type2)
-    compare_plot(df_rtd3, df_rtd4, plot_info3, plot_info4)
+    compare_plot(df_rtd3, df_rtd4, plot_info3, plot_info4, "token_duistribution_comparison.png")
 
-    dataset_uni_token_distribution(sample1, Type1, punctuation=False, stem=False)
-    dataset_uni_token_distribution(sample1, Type1, punctuation=False, stem=True)
-    dataset_uni_token_distribution(sample2, Type2, punctuation=False, stem=False)
-    dataset_uni_token_distribution(sample2, Type2, punctuation=False, stem=True)
+    dataset_uni_token_distribution(sample1, Type1, "Type1_nonstem.png", punctuation=False, stem=False)
+    dataset_uni_token_distribution(sample1, Type1, "Type1_stem.png", punctuation=False, stem=True)
+    dataset_uni_token_distribution(sample2, Type2, "Type2_nonstem.png", punctuation=False, stem=False)
+    dataset_uni_token_distribution(sample2, Type2, "Type2_stem.png", punctuation=False, stem=True)
 
     indicative1, indicative2 = point_wise_relative_entropy([sample1, sample2], [Type1, Type2], punctuation=False, stop_word=True)
     print('top 10 indicative words for '+Type1+' are: ', indicative1)
