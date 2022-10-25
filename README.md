@@ -1,5 +1,5 @@
 # AI6122_G08_Assignment
-This is the AI6122 assignment by Group G08.
+This is the AI6122-Fall2022 assignment by Group G08.
 
 ## 0. System setup
 We have used a bunch of third party libraries. Make sure these libraries are installed in your environment:
