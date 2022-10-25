@@ -1,5 +1,5 @@
 0. System setup
-We have used a bunch of third party libraries. Make sure these libraries are installed in your environment
+We have used a bunch of third party libraries. Make sure these libraries are installed in your environment:
 * NLTK [https://www.nltk.org/index.html]
 * NumPy [https://numpy.org/]
 * pandas [https://pandas.pydata.org/]
@@ -27,8 +27,8 @@ Files: SimpleSearchEngine.py and SimpleSearchEngineUI.py
 "SimpleSearchEngineUI.py" is an interactive UI for you to play with. You can search for any queries in our 2 datasets. You will have 4 input prompts: 
 1. The first prompt is the query. You can enter anything that you want to search for.
 2. The second prompt is the type index. The input should be either 1 or 2.
-2. The third prompt is the number of top results you want to view. The input should be a positive integer. After that, the search result will show up shortly.
-3. The fourth prompt is choosing whether to continue to produce other searches or exit. Remember once you exit, all the memorized datasets will lost and you have to initialize again when you rerun.
+3. The third prompt is the number of top results you want to view. The input should be a positive integer. After that, the search result will show up shortly.
+4. The fourth prompt is choosing whether to continue to produce other searches or exit. Remember once you exit, all the memorized datasets will lost and you have to initialize again when you rerun.
 -----------------------------------------------------------------------
 
 3. Review Summarizer 
