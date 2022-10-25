@@ -76,17 +76,18 @@ def writefile(typ):
     print(f"\ngz file of type {typ} is successfully downloaded")
 
   f = open("./data/"+typ+".txt", 'w')
-  length=0
   for l in parse("./data/"+gz):
-    f.write(l + '\n')
-    length+=1
+    f.write(l + ',\n')
   f.close()
   print(f"Full Data in {typ} is written to a txt file")
-  
+    
+    
 
 def initialize_dataset(typ):
   '''
-  Output a list of dictionaries of a certain product type.
+  Initialize the dataset.
+  Use random seed = 1000 to sample 200 products. Generate the dataset, asin list
+  and review text list.
   '''
   
   t,gz = regularize(typ)
@@ -108,11 +109,27 @@ def initialize_dataset(typ):
   dataset200=[]
   global reviewText200
   reviewText200 = []
+  
   for review in reviews:
     if review['asin'] in asin200:
       dataset200.append(review)
       reviewText200.append(review['reviewText'])
+
+
+def writefile_200(typ):
+  '''
+  Write the sampled dataset to a txt file.
+  '''
   
+  typ,gz = regularize(typ)
+  initialize_dataset(typ)
+  f = open("./data/"+typ+"_200.txt", 'w')
+  for l in parse("./data/"+gz):
+    for i in asin200:
+      if i in l:
+        f.write(l + ',\n')
+  f.close()  
+    
 
 def products_list():
   return dataset200
