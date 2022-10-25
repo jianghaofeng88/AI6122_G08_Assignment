@@ -10,13 +10,20 @@ global dataset200
 global asin200
 global reviewText200
 
+nltk.download("averaged_perceptron_tagger")
+nltk.download("punkt")
 
 noun = "(<NN>|<NNS>)"
 verb = "(<VB>|<VBD>|<VBG>|<VBN>|<VBP>|<VBZ>)"
 adj = "(<JJ>|<JJS>|<JJR>)"
 adv = "(<MD>|<RB>|<RBR>|<RBS>)"
 
+
 def get_global_values():
+    '''
+    Get the initialized dataset from dataset.py.
+    '''
+    
     global dataset200
     dataset200 = products_list()
     global asin200
@@ -24,7 +31,12 @@ def get_global_values():
     global reviewText200  
     reviewText200 = review_text()
 
+
 def set_global_values(d,a,r):
+    '''
+    Enable other python files to set the dataset.
+    '''
+    
     global dataset200
     dataset200 = d
     global asin200
@@ -34,25 +46,45 @@ def set_global_values(d,a,r):
 
 
 def adj_NP():
+    '''
+    Regular expression for NP with adjectives.
+    '''
+    
+    
     g="adj_NP: {<DT>?"
     g+=f"{adj}+{noun}+"
     g+="}"
     return g
 
+
 def adv_VP():
+    '''
+    Regular expression for VP with adverbs.
+    '''
+    
     g="adv_VP: {"
     g+=f"(({adv}+{verb}+{adv}+)|({verb}+{adv}+{verb}+))"
     g+=f"<DT>?{adj}*{noun}*"
     g+="}"
     return g
 
+
 def punctuation_strip(string):
+    '''
+    Add strips to all popular punctuations to avoid unexpected tokenization result.
+    '''    
+    
     puncts = ",.?:;!"
     for p in puncts:
         string = string.replace(p,' '+p+' ')
     return string
 
+
 def extract_grammar(string, grammar):
+    '''
+    The core of extract candidate noun phrases and verb phrases based on the two regular expressions just defined.
+    '''
+        
     string = punctuation_strip(string)
     tokens = word_tokenize(string)
     tokens = [word for word in tokens if word.isalnum() \
@@ -69,6 +101,10 @@ def extract_grammar(string, grammar):
   
 
 def compress_tree(tree):
+    '''
+    Process the parse tree to get a user-friendly data structure.
+    '''
+    
     s=""
     t=[]
     for item in tree:
@@ -76,10 +112,20 @@ def compress_tree(tree):
         t.append(item)
     return s[:-1],t
 
+
 def make_list(treelist):
+    '''
+    Get the list of both candidate strings and the corresponding tags.
+    '''
+    
     return list(dict(map(compress_tree, treelist)).keys()), list(dict(map(compress_tree, treelist)).values())
 
+
 def remove_abb(string):
+    '''
+    Remove possible abbreviations may appear in the review.
+    '''
+        
     string = string.replace("'m"," am")
     string = string.replace("'re"," are")
     string = string.replace("n't"," not")
@@ -91,7 +137,12 @@ def remove_abb(string):
     string = string.replace("'d"," would")
     return string
 
+
 def normalize(word):
+    '''
+    Normalize a single word by case-folding, lemmatization, abbreviation processing.
+    '''
+    
     # Remove abbreviation
     word = remove_abb(word)
     # Lemmatization
@@ -102,11 +153,22 @@ def normalize(word):
     word = word.lower()
     return word
 
+
 def normalize_sentence(sentence):
+    '''
+    Normalize a phrase by case-folding, lemmatization, abbreviation processing.
+    '''    
+    
     sentence = punctuation_strip(sentence)
     return ' '.join(list(map(normalize,word_tokenize(sentence))))
+ 
         
 def process_product(asin):
+    '''
+    Traverse through the dataset and find the target product id.
+    Record all useful information.
+    '''
+    
     l = dataset200
     raw_text = ""
     strlist = []
@@ -124,13 +186,22 @@ def process_product(asin):
     tagdict = dict([item for sublist in taglist for item in sublist])
     return raw_text, strlist, tagdict
 
+
 def tfidf(term, document, collection):
+    '''
+    The essential calculation of TF-IDF algorithm.
+    '''
+    
     tf = max(1,Counter(word_tokenize(document))[term])
     df = sum(map(lambda t: term in t, collection))  
     return (1+np.log10(tf))*np.log10(len(collection)/df)
 
 
 def generate_score(asin):
+    '''
+    Generate the TF-IDF weight of each candidate phrases.
+    '''
+    
     raw_text, strlist, tagdict = process_product(asin)
     document = normalize_sentence(raw_text)
     collection = list(map(normalize_sentence, reviewText200))
@@ -148,6 +219,10 @@ def generate_score(asin):
     return score_dictionary
 
 def generate_summary(asin, n):
+    '''
+    Sort and output n highest scores among candidate phrases.
+    '''  
+    
     sd = generate_score(asin)
     return heapq.nlargest(n, sd, key=sd.get)
 
