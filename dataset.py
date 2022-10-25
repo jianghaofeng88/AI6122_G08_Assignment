@@ -124,10 +124,12 @@ def writefile_200(typ):
   typ,gz = regularize(typ)
   initialize_dataset(typ)
   f = open("./data/"+typ+"_200.txt", 'w')
+  f.write('[')
   for l in parse("./data/"+gz):
     for i in asin200:
       if i in l:
         f.write(l + ',\n')
+  f.write(']')
   f.close()  
     
 
