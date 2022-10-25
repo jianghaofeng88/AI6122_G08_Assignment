@@ -1,11 +1,13 @@
 from summarizer import *
+import warnings
 
 
 if __name__ == '__main__':
+    warnings.filterwarnings("ignore")
     if (len(sys.argv) != 1):
         print("Usage: \npython summarizerUI.py\n")
         exit(1)
-    print("Section 3.4 Review Summarizer")
+    print("\n--------------------------------------------\nSection 3.4 Review Summarizer")
     print("Developed by Jiang Haofeng\n2022/10/22\n--------------------------------------------\n")
     print("Here are the product types avaliable:")
     l = list(np.arange(len(TYPES)))
@@ -17,8 +19,8 @@ if __name__ == '__main__':
     known_types = [0]*24
     while (next_or_exit != "exit"):
         typ = input("\nPlease choose the type of the product by index (e.g. 4, 12, 22, etc. However, due to large size, {0,1,2,3,6,14} is not recommended):")
-        while not (typ.replace('-','',1).isdigit() and int(typ) >= -24 and int(typ) <= 23):
-            print("The index must be an integer from -24 to 23")
+        while not (typ.isdigit() and int(typ) >= 0 and int(typ) <= 23):
+            print("The index must be an integer from 0 to 23")
             typ = input("Please choose the type of the product by index (e.g. 4, 12, 22, etc. However, due to large size, {0,1,2,3,6,14} is not recommended):")
         if known_types[int(typ)] == 0:
             writefile(typ)
