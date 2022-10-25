@@ -2,6 +2,12 @@ import string
 import math
 import demjson
 import collections
+import dataset
+import sys
+
+def txt_to_json():
+    return
+
 
 def tokenize_field(field):
     string_field = str(field).lower() #Convert to lowercase
@@ -120,14 +126,23 @@ class SearchEngine: #core module
             print(doc['doc'])
             print('------------------------------------------------')
 
+
 #json document, need to add ',' between '}' and '{' in assignment json style.
 #add '[' at the beginning and ']' at the end.
-#demjson for recognizing abnormal json files which use '' rather than "" to represent fieldects and attributes.
-products1 = demjson.decode_file('Digital Music_200.json', encoding = 'utf-8')
-products2 = demjson.decode_file('Musical Instruments_200.json', encoding = 'utf-8')
-field_boosts = {'title': 1.1}
-search_engine = SearchEngine(alldocs = products1, field_norm = False)
-query1 = search_engine.query("tree, jazz, cd", field_boosts = field_boosts, num_results = 10)
-search_engine = SearchEngine(alldocs = products2, field_norm = False)
-query2 = search_engine.query("piano, guitar", field_boosts = field_boosts, num_results = 10)
-#10 results together
+#demjson for recognizing abnormal json files which use '' rather than "" to represent fieldects and attributes. 
+dataset.writefile('Digital_Music')
+dataset.writefile('Musical_Instruments')
+print("Initializing dataset......")
+dataset.writefile_200('Digital_Music')
+dataset.writefile_200('Musical_Instruments')
+print("Initializing dataset is successful.\n------------------------------------------------\n")
+products1 = demjson.decode_file('./data/Digital_Music_200.txt', encoding = 'utf-8')
+products2 = demjson.decode_file('./data/Musical_Instruments_200.txt', encoding = 'utf-8')
+field_boosts = {'title': 1.1} 
+
+if __name__ == '__main__':        
+    search_engine = SearchEngine(alldocs = products1, field_norm = False)
+    query1 = search_engine.query("tree, jazz, cd", field_boosts = field_boosts, num_results = 10)
+    search_engine = SearchEngine(alldocs = products2, field_norm = False)
+    query2 = search_engine.query("piano, guitar", field_boosts = field_boosts, num_results = 10)
+    exit(0)    
