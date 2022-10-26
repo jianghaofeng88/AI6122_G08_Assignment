@@ -1,18 +1,24 @@
-0. System setup
+This is the AI6122-Fall2022 assignment by Group G08. 
+
+1. System setup
 We have used a bunch of third party libraries. Make sure these libraries are installed in your environment:
 * NLTK [https://www.nltk.org/index.html]
 * NumPy [https://numpy.org/]
 * pandas [https://pandas.pydata.org/]
 * demjson [https://pypi.org/project/demjson/]
+* vaderSentiment [https://pypi.org/project/vaderSentiment/]
 
 How to run:
 In CMD or Terminal, all python files can be run by command line "python [filename]" or "python3 [filename]" (No other arguments), depends on devices.
 
-Our core environment file in "dataset.py". Make sure this file is in the same directory as you run any other python files.  You do not need to predownload any data, since every section would automatically download the necessary data for you, and would output the downloading process.
-You may see some output regarding [nltk_data], that is to ensure some NLTK functions or data are working, in case they have not been downloaded before.
+Our core environment file in "dataset.py". Make sure this file is in the same directory as you run any other python files.  You do not need to predownload any data, since every section would automatically download the necessary data for you.
+
+Outputs at the very begining:
+The program would output the downloading and initializing process.
+You may also see some output regarding [nltk_data], that is to ensure some NLTK functions or data are working, in case they have not been downloaded before.
 -----------------------------------------------------------------------
 
-1. Dataset Analysis
+2. Dataset Analysis
 Developers: Yang Shunping (coding part) and Chen Zhelong (analysis part)
 File: Dataset_Analysis.py
 
@@ -20,7 +26,7 @@ We choose the type Digital_Music and Musical_Instruments as our datasets. The pr
 The outputs yield 6 plots in total. You can find the plots stored in "images" folder after running.
 -----------------------------------------------------------------------
 
-2. Simple Search Engine
+3. Simple Search Engine
 Developers: Wu Dongjun (function part) and Jiang Haofeng (UI part).
 Files: SimpleSearchEngine.py and SimpleSearchEngineUI.py
 "SimpleSearchEngine.py" contains all functions used in search engine. The main body will output 2 example queries, one from each dataset.
@@ -31,7 +37,7 @@ Files: SimpleSearchEngine.py and SimpleSearchEngineUI.py
 4. The fourth prompt is choosing whether to continue to produce other searches or exit. Remember once you exit, all the memorized datasets will lost and you have to initialize again when you rerun.
 -----------------------------------------------------------------------
 
-3. Review Summarizer 
+4. Review Summarizer 
 Developer: Jiang Haofeng
 Files: summarizer.py and summarizerUI.py
 
@@ -42,4 +48,14 @@ Files: summarizer.py and summarizerUI.py
 3. The third prompt is choosing whether to continue to view other products or exit. Remember once you exit, all the memorized datasets will lost and you have to initialize again when you rerun.
 -----------------------------------------------------------------------
 
-4. Application
+5. Application
+Developers: Cao Yifei (function part) and Jiang Haofeng (UI part).
+Files: sentiment.py and sentimentUI.py
+
+In our application, we focus on sentiment analysis, where the most possible emotion of the user can be analyzed by extracting positive and negative words used in a review, regardless of the actual rating marks. For a dataset, the program will produce the sentiment score of reviews and the ranking. The higher the score is, the more positive emotion a review has.
+
+"sentiment.py" contains all functions used in producing sentiment rank and positive/negative words. The main body will output the sentiment ranking of type Digital_Music and the positive/negative words of one example product.
+"sentimentUI.py" is an interactive UI for you to play with. You can view review positive/negative words of the sampled product in our 2 datasets. You will have 3 input prompts: 
+1. The first prompt is the type index. The input should be either 1 or 2. After chosing, the sentiment analysis rank of the chosen dataset will be shown in the decreasing order.
+2. The second prompt is the asin number. Please choose the asin in the list printed above. After chosing, the positive and negative words will show up shortly.
+3. The third prompt is choosing whether to continue to view other products or exit. Remember once you exit, all the memorized datasets will lost and you have to initialize again when you rerun.
