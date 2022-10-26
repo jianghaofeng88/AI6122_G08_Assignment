@@ -62,11 +62,11 @@ The outputs yield 6 plots in total. You can find the plots stored in "images" fo
 ### Developers: Cao Yifei (function part) and Jiang Haofeng (UI part).
 #### Files: `sentiment.py` and `sentimentUI.py`
 
-In our application, we focus on sentiment analysis, , where the most possible emotion of the user can be analyzed by extracting positive and negative words used in a review, regardless of the actual rating marks.
+In our application, we focus on sentiment analysis, where the most possible emotion of the user can be analyzed by extracting positive and negative words used in a review, regardless of the actual rating marks. For a dataset, the program will produce the sentiment score of reviews and the ranking. The higher the score is, the more positive emotion a review has.
 
-`sentiment.py` contains all functions used in producing the sentiment rank and positive/negative words. The main body will output the rank of type Digital_Music and the positive/negative words of one example product. 
+`sentiment.py` contains all functions used in producing the sentiment rank and positive/negative words. The main body will output the sentiment ranking of type Digital_Music and the positive/negative words of one example product. 
 
 `sentimentUI.py` is an interactive UI for you to play with. You can view review positive/negative words of the sampled product in our 2 datasets. You will have 3 input prompts: 
-1. The first prompt is the type index. The input should be either 1 or 2. If this is the first time you visit this type, the program will download and initialize dataset for you. Then it will memorize the dataset and you will not have to wait for the dataset initialization for this type afterwards. After chosing, the sentiment analysis rank of the chosen dataset will be shown in the decreasing order.
+1. The first prompt is the type index. The input should be either 1 or 2. If this is the first time you visit this type, the program will download and initialize dataset for you. Then it will memorize the dataset and you will not have to wait for the dataset initialization for this type afterwards. After chosing, the sentiment analysis ranking of the chosen dataset will be shown in the decreasing order.
 2. The second prompt is the asin number. Please choose the asin in the list printed above. After chosing, the positive and negative words will show up shortly.
 3. The third prompt is choosing whether to continue to view other products or exit. Remember once you exit, all the memorized datasets will lost and you have to initialize again when you rerun.
