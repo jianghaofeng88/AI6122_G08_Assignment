@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from dataset import *
 import pandas as pd
 import re

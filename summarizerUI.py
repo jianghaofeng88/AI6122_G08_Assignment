@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from summarizer import *
 import warnings
 
@@ -18,10 +20,10 @@ if __name__ == '__main__':
     next_or_exit = ""
     known_types = [0]*24
     while (next_or_exit != "exit"):
-        typ = input("\nPlease choose the type of the product by index (e.g. 4, 12, 22, etc. However, due to large size, {0,1,2,3,6,14} is not recommended):")
+        typ = input("\nPlease choose the type of the product by index (Enter 21 or 22 if you want to focus on our group dataset. Due to large size, {0,1,2,3,6,14} is not recommended):")
         while not (typ.isdigit() and int(typ) >= 0 and int(typ) <= 23):
             print("The index must be an integer from 0 to 23")
-            typ = input("Please choose the type of the product by index (e.g. 4, 12, 22, etc. However, due to large size, {0,1,2,3,6,14} is not recommended):")
+            typ = input("Please choose the type of the product by index (Enter 21 or 22 if you want to focus on our group dataset. Due to large size, {0,1,2,3,6,14} is not recommended):")
         if known_types[int(typ)] == 0:
             writefile(typ)
             print(f"Initializing dataset for {regularize(typ)[0]}......")
